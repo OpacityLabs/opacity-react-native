@@ -1,0 +1,24 @@
+diff --git a/node_modules/react-native-webview/src/WebViewShared.tsx b/node_modules/react-native-webview/src/WebViewShared.tsx
+index 1b2a10b..b775dc7 100644
+--- a/node_modules/react-native-webview/src/WebViewShared.tsx
++++ b/node_modules/react-native-webview/src/WebViewShared.tsx
+@@ -51,7 +51,18 @@ const createOnShouldStartLoadWithRequest = (
+ ) => {
+   return ({ nativeEvent }: ShouldStartLoadRequestEvent) => {
+     let shouldStart = true;
+-    const { url, lockIdentifier } = nativeEvent;
++    const { url:originalUrl, lockIdentifier } = nativeEvent;
++
++    let url:string
++
++    if(originalUrl.startsWith('ios-identity-framework://')) {
++      url = originalUrl.replace('ios-identity-framework://identity', 'https://www.google.com/404')
++    } else {
++      url = originalUrl
++    }
++
++
++    // 
+ 
+     if (!passesWhitelist(compileWhitelist(originWhitelist), url)) {
+       Linking.canOpenURL(url).then((supported) => {

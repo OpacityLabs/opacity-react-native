@@ -1,0 +1,64 @@
+import { ExampleSearchResp } from "../examples/exampleSearchResp";
+
+export type SearchResultInterface = typeof ExampleSearchResp
+
+
+
+export const searchRestaurants = async (token: string, query:string, lat:string = "40.709407", lng:string = "-73.958041"): Promise<SearchResultInterface> => {
+    const resp = await fetch(`https://consumer-mobile-bff.doordash.com/v3/feed/search/autocomplete?lat=${lat}&lng=${lng}&query=${encodeURIComponent(query)}`, {
+        headers: {
+          'Host': 'consumer-mobile-bff.doordash.com',
+          'X-FACETS-FEATURE-GRID-STANDARD': 'true',
+          //'DD-LOCATION-CONTEXT': 'eyJhZGRyZXNzX2lkIjoiMzQxNzE5NzE0IiwiY29uc3VtZXJfYWRkcmVzc19saW5rX2lkIjoiMTc3Mzc4NDY5NiIsImNvdW50cnlfc2hvcnRfbmFtZSI6IlVTIiwiZGlzdHJpY3RfaWQiOiIxNjAiLCJsYXQiOjQwLjcwOTQwNywibG5nIjotNzMuOTU4MDQxLCJtYXJrZXRfaWQiOiI4Iiwic3RhdGUiOiJOWSIsInN1Ym1hcmtldF9pZCI6IjgiLCJ0aW1lem9uZSI6IkFtZXJpY2FcL05ld19Zb3JrIiwiemlwY29kZSI6IjExMjExIn0=',
+          'Accept': 'application/json',
+          'X-FACETS-FEATURE-TOP-10-CAROUSELS': 'true',
+          'Client-Version': 'ios v6.11.0 b167648',
+          'X-SUPPORT-NESTED-MENU': 'true',
+        //  'x-client-request-id': '65682491-0F73-41C7-859B-2780A10743C6-cx-ios',
+          'X-FACETS-FEATURE-VERTICAL-SEARCH': 'true',
+          'X-FACETS-FEATURE-ITEM-CAROUSEL': 'true',
+          'X-FACETS-FEATURE-LOGO-MERCHANDISING': 'true',
+          'X-SUPPORT-SCHEDULE-SAVE': 'true',
+          'X-FACETS-VERSION': '6.0.0',
+          'X-PREFERENCE-MODAL-EXPERIENCE-TYPE': 'category-first',
+          'User-Agent': 'DoordashConsumer/6.11.0 (iPhone; iOS 17.1.1; Scale/3.0)',
+          'X-FACETS-FEATURE-NO-TILE': 'true',
+        //  'x-session-id': '58A6D1F6-D576-4698-97C3-313CEBC2E70C-cx-ios',
+          'X-EXPERIENCE-ID': 'doordash',
+          'X-FACETS-FEATURE-ROW-CARD-CONTAINER': 'true',
+          //'x-correlation-id': 'AEF51584-C9BB-44D6-8F86-535FF6EA23EB-cx-ios',
+          'X-FACETS-FEATURE-SAVE-FOR-LATER-ITEMS': 'control',
+          'X-FACETS-FEATURE-STORE-CAROUSEL-REDESIGN-ROUND-1': 'treatmentVariant2',
+          //'Cookie': '__cf_bm=dAWmRExrEV0hV5WKQyt0Wj.JyNFVGcuTUrAs_.lrSiY-1711733274-1.0.1.1-Zxnl.AZFEOM4sAGlfJHXjyFYnXRntENSTsre96ScNM4QsP4XyPyiw5vfgDMOIytcFurUxIYWp39yVkIFDEUz2Q; _cfuvid=o53WqSXx9PVcWlwLxYQ153TAWkyLu1eCkXajD78Q1ok-1711733274182-0.0.1.1-604800000; dd_country_shortname=US; dd_market_id=8; ajs_anonymous_id=e9c62e77-67e5-44d3-822e-34675eba7a15; amplitude_id_8a4cf5f3981e8b7827bab3968fb1ad2bdoordash.com=eyJkZXZpY2VJZCI6IjMzYzk3MzJjLTRlYWQtNDhiYy04MGIyLWFkN2I4MWQ2Nzc0NFIiLCJ1c2VySWQiOm51bGwsIm9wdE91dCI6ZmFsc2UsInNlc3Npb25JZCI6MTcxMTY0NDM3MjcwMCwibGFzdEV2ZW50VGltZSI6MTcxMTY0NDM4NjA5NywiZXZlbnRJZCI6OSwiaWRlbnRpZnlJZCI6MCwic2VxdWVuY2VOdW1iZXIiOjl9; _fbp=fb.1.1711644372816.727849060; _ga=GA1.2.1339392730.1711644373; _ga_9ZH32N32VL=GS1.1.1711644372.1.1.1711644385.0.0.0; _ga_BXB2XKP8LL=GS1.1.1711644372.1.1.1711644385.0.0.0; _ga_J4BQM7M3T2=GS1.1.1711644372.1.1.1711644385.47.0.0; _gcl_au=1.1.91273294.1711644372; _uetvid=affbc470ed2211ee96ac7da0cf96d478|1j31bf6|1711644385909|2|1|bat.bing.com/p/insights/c/n; _yjsu_yjad=1711644373.6bbce707-5f58-4370-8349-462df210fe13',
+        //  'X-DEVICE-CONTEXT': '{"is_zoomed":false,"screen_width":"428","platform":"iOS","screen_height":"926"}',
+          'X-FACETS-FEATURE-MULTI-STORE-RETAIL-ITEM-MERCHANDISING': 'true',
+          'X-FACETS-FEATURE-STORE-CELL-REDESIGN-ROUND-3': 'treatmentVariant3',
+          'Accept-Language': 'en-US',
+          'X-FACETS-FEATURE-CUISINE-FILTER-V2': 'true',
+          'X-SAVELIST-EXPERIENCE-TYPE': 'heart',
+          'X-FACETS-FEATURE-BACKEND-DRIVEN-BADGES': 'true',
+          'Authorization': `JWT ${token}`,
+          'X-SUPPORT-DELIVERY-FEE-SORT': 'true',
+          'Content-Type': 'application/json',
+          'X-FACETS-FEATURE-ALWAYS-OPEN-NV': 'true',
+          'X-FACETS-FEATURE-ITEM-STEPPERS': 'true',
+          'X-FACETS-FEATURE-TALL-LOGO-CAROUSEL': 'true',
+          'X-SUPPORT-PARTNER-DASHPASS': 'true',
+        //  'dd-ids': '{"dd_delivery_correlation_id":"d6d38bef-f65b-4bad-aed5-7202fd2095bc","dd_device_id":"dx_24DA2023-4515-4E6F-A237-9F0C645C267E","dd_login_id":"lx_0E9CF6B1-FC93-4F08-B3DF-35DDD035B225","dd_session_id":"sx_50D052EF-B3AE-48C5-AB8A-80F4AACB4940","dd_ios_idfa_id":"00000000-0000-0000-0000-000000000000","dd_ios_idfv_id":"24DA2023-4515-4E6F-A237-9F0C645C267E"}',
+          'dd-product-id': 'consumer/doordash-app',
+          'X-Ios-Bundle-Identifier': 'doordash.DoorDashConsumer',
+          'X-FACETS-FEATURE-QUICK-ADD-STEPPER-VARIANT': 'plus'
+        }
+      });
+
+
+      console.log('Search restaurants', resp);
+
+    if (!resp.ok) {
+        throw new Error('Failed to fetch orders');
+    }
+
+    return await resp.json() as SearchResultInterface
+
+
+}
