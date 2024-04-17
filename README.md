@@ -1,5 +1,11 @@
 # React Native TLSN
 
+### Add ios target
+
+```
+rustup target add aarch64-apple-ios aarch64-apple-ios-sim
+cargo install cbindgen
+```
 
 ### Build for Simulator
 
