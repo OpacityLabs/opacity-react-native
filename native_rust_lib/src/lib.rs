@@ -6,10 +6,11 @@ use hyper_util::rt::TokioIo;
 use serde::{Deserialize, Serialize};
 use std::ops::Range;
 use tlsn_core::proof::TlsProof;
+use tokio::io::DuplexStream;
 use tokio_util::compat::{FuturesAsyncReadCompatExt, TokioAsyncReadCompatExt};
 
 use lazy_static::lazy_static;
-use notary::request_notarization;
+
 use std::ffi::{c_char, CStr, CString};
 
 use std::sync::Arc;
@@ -42,6 +43,8 @@ struct Request {
     headers: Vec<(String, String)>,
     body: String,
     redact_strings: Vec<String>,
+    max_sent: usize,
+    max_recv: usize,
 }
 
 #[no_mangle]
@@ -56,12 +59,22 @@ unsafe extern "C" fn start(request: *const c_char) -> *const c_char {
         .build()
         .unwrap();
 
+    let (prover_socket, notary_socket) = tokio::io::duplex(1 << 16);
+
+    let notary_handle = runtime.spawn(async move {
+        notary::run_notary(notary_socket.compat(), request.max_sent, request.max_recv).await;
+    });
+
     let handle = runtime.spawn(async move {
-        let result = run(request).await;
+        let result = run(request, prover_socket).await;
         CString::new(result).unwrap()
     });
 
     let result = runtime.block_on(handle).unwrap();
+
+    if (notary_handle.is_finished()) {
+        println!("Notary finished");
+    }
 
     println!("Thread finished");
 
@@ -70,27 +83,26 @@ unsafe extern "C" fn start(request: *const c_char) -> *const c_char {
 
 ffi_support::define_string_destructor!(signer_destroy_string);
 
-async fn run(request: Request) -> String {
-
-    let proof = notarize(&request).await;
+async fn run(request: Request, prover_socket: DuplexStream) -> String {
+    let proof = notarize(&request, prover_socket).await;
 
     let json_proof = serde_json::to_string_pretty(&proof).unwrap();
 
     json_proof
 }
 
-async fn notarize(request: &Request) -> TlsProof {
-    let (prover_socket, session_id) =
-        request_notarization("notary.pse.dev", 443, Some(16384)).await;
-
+async fn notarize(request: &Request, prover_socket: DuplexStream) -> TlsProof {
+    // let (prover_socket, session_id) =
+    //     request_notarization("notary.pse.dev", 443, Some(16384)).await;
 
     // A Prover configuration
     let config = ProverConfig::builder()
-        .id(session_id)
+        .id("example")
+        .max_sent_data(request.max_sent)
+        .max_recv_data(request.max_recv)
         .server_dns(request.to_owned().host)
         .build()
         .unwrap();
-
     // Create a Prover and set it up with the Notary
     // This will set up the MPC backend prior to connecting to the server.
     let prover = Prover::new(config)
@@ -122,8 +134,7 @@ async fn notarize(request: &Request) -> TlsProof {
     tokio::spawn(connection);
 
     // Build a simple HTTP request with common headers
-    let mut builder = HRequest::builder()
-        .uri(request.to_owned().path);
+    let mut builder = HRequest::builder().uri(request.to_owned().path);
 
     for (header_name, header_value) in request.headers.clone() {
         builder = builder.header(header_name, header_value);
@@ -132,19 +143,16 @@ async fn notarize(request: &Request) -> TlsProof {
     let notarization_request = if !request.body.is_empty() {
         // info!("empty body");
         builder
-        .method("POST")
-        .body(http_body_util::Full::from(hyper::body::Bytes::from(request.clone().body)))
-        .unwrap()
-
+            .method("POST")
+            .body(http_body_util::Full::from(hyper::body::Bytes::from(
+                request.clone().body,
+            )))
+            .unwrap()
     } else {
         builder.body(Full::new(Bytes::default())).unwrap()
     };
 
-
-
     println!("Starting an MPC TLS connection with the server");
-
-
 
     // Send the request to the Server and get a response via the MPC TLS connection
     let response = request_sender
@@ -168,7 +176,6 @@ async fn notarize(request: &Request) -> TlsProof {
     println!("Notarization completed successfully!");
     proof
 }
-
 
 /// Find the ranges of the public and private parts of a sequence.
 ///
