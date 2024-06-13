@@ -1,4 +1,4 @@
-# React Native TLSN
+# React Native zkTLS
 
 
 ### Build for Simulator
