@@ -53,6 +53,7 @@ export const Login = ({navigation}: Props) => {
         scalesPageToFit={false}
         // Remove incognito to preserve cache and restore login between sessions
         incognito={false}
+        userAgent={"Mozilla/5.0 (iPhone; CPU iPhone OS 17_1_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1.1 Mobile/15E148 Safari/604.1"}
         source={{uri: generateDoordashLoginUrl(deviceId, state)}}
         // onNavigationStateChange={(navState) => {
         //   console.log('navState', navState);
